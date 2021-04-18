@@ -1274,12 +1274,12 @@ contract TWAPOracleUpdater is ERC20Permit, VaultOwned {
   }
 
   function addTWAPSource( address newTWAPSourceDexPool_ ) external onlyOwner() {
-    require( _dexPoolsTWAPSources.add( newTWAPSourceDexPool_ ), "OlympusERC20TOken: TWAP Source already stored." );
+    require( _dexPoolsTWAPSources.add( newTWAPSourceDexPool_ ), "TaoERC20TOken: TWAP Source already stored." );
     emit TWAPSourceAdded( newTWAPSourceDexPool_ );
   }
 
   function removeTWAPSource( address twapSourceToRemove_ ) external onlyOwner() {
-    require( _dexPoolsTWAPSources.remove( twapSourceToRemove_ ), "OlympusERC20TOken: TWAP source not present." );
+    require( _dexPoolsTWAPSources.remove( twapSourceToRemove_ ), "TaoERC20TOken: TWAP source not present." );
     emit TWAPSourceRemoved( twapSourceToRemove_ );
   }
 
@@ -1309,11 +1309,12 @@ contract Divine is TWAPOracleUpdater {
   }
 }
 
-contract OlympusERC20Token is Divine {
+contract MockTAO is Divine {
 
   using SafeMath for uint256;
 
-    constructor() Divine("Olympus", "OHM", 9) {
+    constructor() Divine("Tao Dao", "TAO", 9) {
+      _mint(msg.sender, 80000000000000);
     }
 
     function mint(address account_, uint256 amount_) external onlyVault() {

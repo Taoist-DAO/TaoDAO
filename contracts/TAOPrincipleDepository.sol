@@ -6,12 +6,12 @@ interface IOwnable {
     function owner() external view returns (address);
 
     function renounceOwnership() external;
-  
+
     function transferOwnership( address newOwner_ ) external;
 }
 
 contract Ownable is IOwnable {
-    
+
     address internal _owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -283,7 +283,7 @@ abstract contract ERC20 is IERC20 {
 
     // TODO comment actual hash value.
     bytes32 constant private ERC20TOKEN_ERC1820_INTERFACE_ID = keccak256( "ERC20Token" );
-    
+
     mapping (address => uint256) internal _balances;
 
     mapping (address => mapping (address => uint256)) internal _allowances;
@@ -291,9 +291,9 @@ abstract contract ERC20 is IERC20 {
     uint256 internal _totalSupply;
 
     string internal _name;
-    
+
     string internal _symbol;
-    
+
     uint8 internal _decimals;
 
     constructor (string memory name_, string memory symbol_, uint8 decimals_) {
@@ -881,18 +881,22 @@ library FixedPoint {
 
 interface IPrincipleDepository {
 
-    function getDepositorInfo( address _depositorAddress_ ) external view returns ( uint principleAmount_, uint interestDue_, uint maturationBlock_ );
-    
+    function getDepositorInfo( address _depositorAddress_ ) external view returns
+        ( uint principleValue_, uint paidOut_, uint maxPayout, uint vestingPeriod_ );
+
     function depositBondPrinciple( uint256 amountToDeposit_ ) external returns ( bool );
 
     function depositBondPrincipleWithPermit( uint256 amountToDeposit_, uint256 deadline, uint8 v, bytes32 r, bytes32 s ) external returns ( bool );
 
     function redeemBond() external returns ( bool );
 
-    function withdrawPrincipleAndForfeitInterest() external returns ( bool );
-      
-    function calculateBondInterest( uint principleValue_ ) external view returns ( uint interestDue_ );
-        
+    function calculatePercentVested( address depositor_ ) external view returns ( uint _percentVested );
+
+    function calculatePendingPayout( address depositor_ ) external view returns ( uint _pendingPayout );
+
+    function calculateBondInterest( uint principleValue_ ) external view returns ( uint maxPayout );
+
+    function calculatePremium() external view returns ( uint _premium );
 }
 
 interface IBondingCalculator {
@@ -903,64 +907,77 @@ interface ITreasury {
     function depositPrinciple( uint depositAmount_ ) external returns ( bool );
 }
 
-contract OHMPrincipleDepository is IPrincipleDepository, Ownable {
+contract TAOPrincipleDepository is IPrincipleDepository, Ownable {
 
     using FixedPoint for *;
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
     struct DepositInfo {
-        uint principleAmount;
-        uint interestDue;
-        uint maturationBlock;
+        uint principleValue; // Risk-Free Value of LP
+        uint payoutRemaining; // TAO remaining to be paid
+        uint lastBlock; // Last interaction
+        uint vestingPeriod; // Blocks left to vest
     }
-    
+
     mapping( address => DepositInfo ) public depositorInfo;
 
-    uint public bondControlVariable;
-    uint public bondingPeriodInBlocks; 
-    uint public minPremium;
+    uint public bondControlVariable; // Premium scaling variable
+    uint public vestingPeriodInBlocks;
+    uint public minPremium; // Floor for the premium
 
     address public treasury;
     address public bondCalculator;
-    address public principleToken;
-    address public OHM;
+    address public principleToken; // TAO-DAI LP
+    address public TAO;
 
-    uint256 public totalDebt;
-    
+    uint256 public totalDebt; // Total principle value of outstanding bonds
+
     address public stakingContract;
     address public DAOWallet;
-    uint public DAOShare;
-    
-    constructor( address principleToken_, address OHM_ ) {
+    address public RewardPool;
+    uint public DAOShare; // % = 1 / DAOShare
+    uint public LPShare; // % = 1 /LPShare
+
+    bool public isInitialized;
+
+    function initialize ( address principleToken_, address TAO_ ) external onlyOwner() returns ( bool ) {
+        require( isInitialized == false );
         principleToken = principleToken_;
-        OHM = OHM_;
-    }
-    
-    function setAddresses( address bondCalculator_, address treasury_, address stakingContract_, 
-    address DAOWallet_, uint DAOShare_ ) external onlyOwner() returns ( bool ) {
-        bondCalculator = bondCalculator_;
-        treasury = treasury_;
-        stakingContract = stakingContract_;
-        DAOWallet = DAOWallet_;
-        DAOShare = DAOShare_;
+        TAO = TAO_;
+
+        isInitialized = true;
+
         return true;
     }
 
-    function setBondTerms( uint bondControlVariable_, uint bondingPeriodInBlocks_, uint minPremium_ ) 
+    function setAddresses( address bondCalculator_, address treasury_, address stakingContract_, address RewardPool_,
+    address DAOWallet_, uint DAOShare_, uint LPShare_ ) external onlyOwner() returns ( bool ) {
+        bondCalculator = bondCalculator_;
+        treasury = treasury_;
+        stakingContract = stakingContract_;
+        RewardPool = RewardPool_;
+        DAOWallet = DAOWallet_;
+        DAOShare = DAOShare_;
+        LPShare = LPShare_;
+        return true;
+    }
+
+    function setBondTerms( uint bondControlVariable_, uint vestingPeriodInBlocks_, uint minPremium_ )
     external onlyOwner() returns ( bool ) {
         bondControlVariable = bondControlVariable_;
-        bondingPeriodInBlocks = bondingPeriodInBlocks_;
+        vestingPeriodInBlocks = vestingPeriodInBlocks_;
         minPremium = minPremium_;
         return true;
     }
 
-    function getDepositorInfo( address depositorAddress_ ) 
-    external view override returns ( uint _principleAmount, uint _interestDue, uint _maturationBlock ) {
+    function getDepositorInfo( address depositorAddress_ ) external view override returns
+    ( uint _principleValue, uint _payoutRemaining, uint _lastBlock, uint _vestingPeriod ) {
         DepositInfo memory depositorInfo_ = depositorInfo[ depositorAddress_ ];
-        _principleAmount = depositorInfo_.principleAmount;
-        _interestDue = depositorInfo_.interestDue;
-        _maturationBlock = depositorInfo_.maturationBlock;
+        _principleValue = depositorInfo_.principleValue;
+        _payoutRemaining = depositorInfo_.payoutRemaining;
+        _lastBlock = depositorInfo_.lastBlock;
+        _vestingPeriod = depositorInfo_.vestingPeriod;
     }
 
     function depositBondPrinciple( uint amountToDeposit_ ) external override returns ( bool ) {
@@ -968,7 +985,7 @@ contract OHMPrincipleDepository is IPrincipleDepository, Ownable {
         return true;
     }
 
-    function depositBondPrincipleWithPermit( uint amountToDeposit_, uint deadline, uint8 v, bytes32 r, bytes32 s ) 
+    function depositBondPrincipleWithPermit( uint amountToDeposit_, uint deadline, uint8 v, bytes32 r, bytes32 s )
     external override returns ( bool ) {
         ERC20Permit( principleToken ).permit( msg.sender, address(this), amountToDeposit_, deadline, v, r, s );
         _depositBondPrinciple( amountToDeposit_ ) ;
@@ -981,60 +998,98 @@ contract OHMPrincipleDepository is IPrincipleDepository, Ownable {
         uint principleValue_ = IBondingCalculator( bondCalculator )
             .principleValuation( principleToken, amountToDeposit_ ).div( 1e9 );
 
-        uint interestDue_ = _calculateBondInterest( principleValue_ );
+        uint payout_ = _calculateBondInterest( principleValue_ );
 
-        require( interestDue_ >= 10000000, "Bond too small" );
+        require( payout_ >= 10000000, "Bond too small" );
 
-        totalDebt = totalDebt.add( interestDue_ );
+        totalDebt = totalDebt.add( principleValue_ );
+
+        uint profit_ = principleValue_.sub( payout_ );
+        uint DAOProfit_ = FixedPoint.fraction( profit_, DAOShare ).decode();
+        uint LPProfit_ = FixedPoint.fraction( profit_, LPShare ).decode();
+        uint stakingProfit_ = (profit_.sub( DAOProfit_ )).sub( LPProfit_ );
+
+        IUniswapV2ERC20( principleToken ).approve( address( treasury ), amountToDeposit_ );
+
+        ITreasury( treasury ).depositPrinciple( amountToDeposit_ ); // Returns TAO
+
+
+        IERC20( TAO ).safeTransfer( stakingContract, stakingProfit_);
+        IERC20( TAO ).safeTransfer( DAOWallet, DAOProfit_ );
+        IERC20( TAO ).safeTransfer( RewardPool, LPProfit_ );
 
         depositorInfo[msg.sender] = DepositInfo({
-            principleAmount: depositorInfo[msg.sender].principleAmount.add( amountToDeposit_ ),
-            interestDue: depositorInfo[msg.sender].interestDue.add( interestDue_ ),
-            maturationBlock: block.number.add( bondingPeriodInBlocks )
+            principleValue: depositorInfo[msg.sender].principleValue.add( principleValue_ ),
+            payoutRemaining: depositorInfo[msg.sender].payoutRemaining.add( payout_ ),
+            lastBlock: block.number,
+            vestingPeriod: vestingPeriodInBlocks
         });
         return true;
     }
 
     function redeemBond() external override returns ( bool ) {
-        require( depositorInfo[msg.sender].interestDue > 0, "Sender is not due any interest." );
-        require( block.number >= depositorInfo[msg.sender].maturationBlock, "Bond has not matured." );
+        uint payoutRemaining_ = depositorInfo[msg.sender].payoutRemaining;
 
-        uint principleAmount_ = depositorInfo[msg.sender].principleAmount;
-        uint interestDue_ = depositorInfo[msg.sender].interestDue;
+        require( payoutRemaining_ > 0, "Sender is not due any interest." );
 
-        delete depositorInfo[msg.sender];
+        uint principleValue_ = depositorInfo[msg.sender].principleValue;
 
-        uint principleValue = IBondingCalculator( bondCalculator )
-            .principleValuation( principleToken, principleAmount_ ).div( 1e9 );
+        uint blocksSinceLast_ = block.number.sub( depositorInfo[msg.sender].lastBlock );
 
-        uint profit_ = principleValue.sub( interestDue_ );
-        uint DAOProfit_ = FixedPoint.fraction( profit_, DAOShare ).decode();
+        uint vestingPeriod_ = depositorInfo[msg.sender].vestingPeriod;
 
-        IUniswapV2ERC20( principleToken ).approve( address( treasury ), principleAmount_ );
+        uint percentVested_ = _calculatePercentVested( msg.sender );
 
-        ITreasury( treasury ).depositPrinciple( principleAmount_ );
+        if ( percentVested_ >= 10000 ) {
+            delete depositorInfo[msg.sender];
 
-        IERC20( OHM ).safeTransfer( msg.sender, interestDue_ );
-        IERC20( OHM ).safeTransfer( stakingContract, profit_.sub( DAOProfit_ ) );
-        IERC20( OHM ).safeTransfer( DAOWallet, DAOProfit_ );
+            IERC20( TAO ).safeTransfer( msg.sender, payoutRemaining_ );
+            totalDebt = totalDebt.sub( principleValue_ );
 
-        totalDebt = totalDebt.sub( interestDue_ );
+            return true;
+        }
+
+        uint payout_ = payoutRemaining_.mul( percentVested_ ).div( 10000 );
+        IERC20( TAO ).safeTransfer( msg.sender, payout_ );
+
+        uint principleUsed_ = principleValue_.mul( percentVested_ ).div( 10000 );
+        totalDebt = totalDebt.sub( principleUsed_ );
+
+        depositorInfo[msg.sender] = DepositInfo({
+            principleValue: principleValue_.sub( principleUsed_ ),
+            payoutRemaining: payoutRemaining_.sub( payout_ ),
+            lastBlock: block.number,
+            vestingPeriod: vestingPeriod_.sub( blocksSinceLast_ )
+        });
         return true;
     }
 
-    function withdrawPrincipleAndForfeitInterest() external override returns ( bool ) {
-        uint amountToWithdraw_ = depositorInfo[msg.sender].principleAmount;
-        require( amountToWithdraw_ > 0, "user has no principle to withdraw" );
+    function calculatePercentVested( address depositor_ ) external view override returns ( uint _percentVested ) {
+        _percentVested = _calculatePercentVested( depositor_ );
+    }
 
-        uint interestToDelete_ = depositorInfo[msg.sender].interestDue;
+    // In thousandths ( 1 = 0.01% )
+    function _calculatePercentVested( address depositor_ ) internal view returns ( uint _percentVested ) {
+        uint blocksSinceLast_ = block.number.sub( depositorInfo[ depositor_ ].lastBlock );
 
-        delete depositorInfo[msg.sender];
+        uint vestingPeriod_ = depositorInfo[ depositor_ ].vestingPeriod;
 
-        totalDebt = totalDebt.sub( interestToDelete_ );
+        if ( vestingPeriod_ > 0 ) {
+            _percentVested = blocksSinceLast_.mul( 10000 ).div( vestingPeriod_ );
+        } else {
+            _percentVested = 0;
+        }
+    }
 
-        IERC20( principleToken ).safeTransfer( msg.sender, amountToWithdraw_ );
+    function calculatePendingPayout( address depositor_ ) external view override returns ( uint _pendingPayout ) {
+        uint percentVested_ = _calculatePercentVested( depositor_ );
+        uint payoutRemaining_ = depositorInfo[ depositor_ ].payoutRemaining;
 
-        return true;
+        _pendingPayout = payoutRemaining_.mul( percentVested_ ).div( 10000 );
+
+        if ( percentVested_ >= 10000 ) {
+            _pendingPayout = payoutRemaining_;
+        }
     }
 
     function calculateBondInterest( uint amountToDeposit_ ) external view override returns ( uint _interestDue ) {
@@ -1046,6 +1101,10 @@ contract OHMPrincipleDepository is IPrincipleDepository, Ownable {
         _interestDue = FixedPoint.fraction( principleValue_, _calcPremium() ).decode112with18().div( 1e16 );
     }
 
+    function calculatePremium() external view override returns ( uint _premium ) {
+        _premium = _calcPremium();
+    }
+
     function _calcPremium() internal view returns ( uint _premium ) {
         _premium = bondControlVariable.mul( _calcDebtRatio() ).add( uint(1000000000) ).div( 1e7 );
         if ( _premium < minPremium ) {
@@ -1053,12 +1112,12 @@ contract OHMPrincipleDepository is IPrincipleDepository, Ownable {
         }
     }
 
-    function _calcDebtRatio() internal view returns ( uint _debtRatio ) {    
-        _debtRatio = FixedPoint.fraction( 
+    function _calcDebtRatio() internal view returns ( uint _debtRatio ) {
+        _debtRatio = FixedPoint.fraction(
             // Must move the decimal to the right by 9 places to avoid math underflow error
-            totalDebt.mul( 1e9 ), 
-            IERC20( OHM ).totalSupply()
-        ).decode112with18().div(1e18);
+            totalDebt.mul( 1e9 ),
+            IERC20( TAO ).totalSupply()
+        ).decode112with18().div( 1e18 );
         // Must move the decimal tot he left 18 places to account for the 9 places added above and the 19 signnificant digits added by FixedPoint.
     }
 }

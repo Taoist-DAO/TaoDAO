@@ -620,7 +620,7 @@ interface IBondingCalculator {
   function calculateBondInterest( address treasury_, address principleTokenAddress_, uint amountDeposited_, uint bondScalingFactor ) external returns ( uint interestDue_ );
 }
 
-contract OlympusBondingCalculator is IBondingCalculator {
+contract TaoBondingCalculator is IBondingCalculator {
 
   using FixedPoint for *;
   using SafeMath for uint;
@@ -630,10 +630,10 @@ contract OlympusBondingCalculator is IBondingCalculator {
   event PrincipleValuation( uint k_, uint amountDeposited_, uint totalSupplyOfTokenDeposited_, uint principleValuation_  );
   event BondInterest( uint k_, uint amountDeposited_, uint totalSupplyOfTokenDeposited_, uint pendingDebtDue_, uint managedTokenTotalSupply_, uint bondScalingValue_, uint interestDue_ );
 
-  function _calcDebtRatio( uint pendingDebtDue_, uint managedTokenTotalSupply_ ) internal pure returns ( uint debtRatio_ ) {    
-    debtRatio_ = FixedPoint.fraction( 
+  function _calcDebtRatio( uint pendingDebtDue_, uint managedTokenTotalSupply_ ) internal pure returns ( uint debtRatio_ ) {
+    debtRatio_ = FixedPoint.fraction(
       // Must move the decimal to the right by 9 places to avoid math underflow error
-      pendingDebtDue_.mul( 1e9 ), 
+      pendingDebtDue_.mul( 1e9 ),
       managedTokenTotalSupply_
     ).decode112with18()
     // Must move the decimal tot he left 18 places to account for the 9 places added above and the 19 signnificant digits added by FixedPoint.
@@ -685,6 +685,7 @@ contract OlympusBondingCalculator is IBondingCalculator {
     emit BondInterest( k_, amountDeposited_, totalSupplyOfTokenDeposited_, pendingDebtDue_, managedTokenTotalSupply_, bondScalingValue_, interestDue_ );
   }
 
+
   function calculateBondInterest( address treasury_, address principleTokenAddress_, uint amountDeposited_, uint bondScalingValue_ ) external override returns ( uint interestDue_ ) {
     //uint k_ = IUniswapV2Pair( principleTokenAddress_ ).kLast();
 
@@ -700,7 +701,7 @@ contract OlympusBondingCalculator is IBondingCalculator {
 
     interestDue_ = _calculateBondInterest( k_, amountDeposited_, principleTokenTotalSuply_, outstandingDebtAmount_, managedTokenTotalSuply_, bondScalingValue_ );
   }
-  
+
   function _getKValue( address principleTokenAddress_ ) internal view returns( uint k_ )  {
     (uint reserve0, uint reserve1, ) = IUniswapV2Pair( principleTokenAddress_ ).getReserves();
      k_ = reserve0.mul(reserve1).div(1e9);

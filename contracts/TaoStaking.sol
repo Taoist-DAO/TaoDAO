@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2021-03-20
-*/
-
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
@@ -203,12 +199,12 @@ interface IOwnable {
   function owner() external view returns (address);
 
   function renounceOwnership() external;
-  
+
   function transferOwnership( address newOwner_ ) external;
 }
 
 contract Ownable is IOwnable {
-    
+
   address internal _owner;
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -262,13 +258,13 @@ contract Ownable is IOwnable {
 interface IStaking {
 
     function initialize(
-        address olyTokenAddress_,
-        address sOLY_,
-        address dai_
+        address taoTokenAddress_,
+        address sTAO_,
+        address busd_
     ) external;
 
-    //function stakeOLY(uint amountToStake_) external {
-    function stakeOLYWithPermit (
+    //function stakeTAO(uint amountToStake_) external {
+    function stakeTAOWithPermit (
         uint256 amountToStake_,
         uint256 deadline_,
         uint8 v_,
@@ -276,8 +272,8 @@ interface IStaking {
         bytes32 s_
     ) external;
 
-    //function unstakeOLY( uint amountToWithdraw_) external {
-    function unstakeOLYWithPermit (
+    //function unstakeTAO( uint amountToWithdraw_) external {
+    function unstakeTAOWithPermit (
         uint256 amountToWithdraw_,
         uint256 deadline_,
         uint8 v_,
@@ -285,11 +281,11 @@ interface IStaking {
         bytes32 s_
     ) external;
 
-    function stakeOLY( uint amountToStake_ ) external returns ( bool );
+    function stakeTAO( uint amountToStake_ ) external returns ( bool );
 
-    function unstakeOLY( uint amountToWithdraw_ ) external returns ( bool );
+    function unstakeTAO( uint amountToWithdraw_ ) external returns ( bool );
 
-    function distributeOLYProfits() external;
+    function distributeTAOProfits() external;
 }
 
 interface IERC20 {
@@ -658,8 +654,8 @@ interface ITreasury {
   function incurDebt( address principleToken_, uint principieTokenAmountDeposited_ ) external returns ( bool );
 }
 
-interface IOHMandsOHM {
-    function rebase(uint256 ohmProfit)
+interface ITAOandsTAO {
+    function rebase(uint256 taoProfit)
         external
         returns (uint256);
 
@@ -678,20 +674,20 @@ interface IOHMandsOHM {
     ) external;
 }
 
-contract OlympusStaking is Ownable {
+contract TaoStaking is Ownable {
 
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
   uint256 public epochLengthInBlocks;
 
-  address public ohm;
-  address public sOHM;
-  uint256 public ohmToDistributeNextEpoch;
+  address public tao;
+  address public sTAO;
+  uint256 public taoToDistributeNextEpoch;
 
   uint256 nextEpochBlock;
 
-  bool isInitialized;
+  bool public isInitialized;
 
   modifier notInitialized() {
     require( !isInitialized );
@@ -699,12 +695,12 @@ contract OlympusStaking is Ownable {
   }
 
   function initialize(
-        address ohmTokenAddress_,
-        address sOHM_,
-        uint8 epochLengthInBlocks_
+        address taoTokenAddress_,
+        address sTAO_,
+        uint32 epochLengthInBlocks_
     ) external onlyOwner() notInitialized() {
-        ohm = ohmTokenAddress_;
-        sOHM = sOHM_;
+        tao = taoTokenAddress_;
+        sTAO = sTAO_;
         epochLengthInBlocks = epochLengthInBlocks_;
         isInitialized = true;
     }
@@ -713,29 +709,29 @@ contract OlympusStaking is Ownable {
     epochLengthInBlocks = newEpochLengthInBlocks_;
   }
 
-  function _distributeOHMProfits() internal {
+  function _distributeTAOProfits() internal {
     if( nextEpochBlock <= block.number ) {
-      IOHMandsOHM(sOHM).rebase(ohmToDistributeNextEpoch);
-      uint256 _ohmBalance = IOHMandsOHM(ohm).balanceOf(address(this));
-      uint256 _sohmSupply = IOHMandsOHM(sOHM).circulatingSupply();
-      ohmToDistributeNextEpoch = _ohmBalance.sub(_sohmSupply);
+      ITAOandsTAO(sTAO).rebase(taoToDistributeNextEpoch);
+      uint256 _taoBalance = ITAOandsTAO(tao).balanceOf(address(this));
+      uint256 _staoSupply = ITAOandsTAO(sTAO).circulatingSupply();
+      taoToDistributeNextEpoch = _taoBalance.sub(_staoSupply);
       nextEpochBlock = nextEpochBlock.add( epochLengthInBlocks );
     }
   }
 
-  function _stakeOHM( uint256 amountToStake_ ) internal {
-    _distributeOHMProfits();
-        
-    IERC20(ohm).safeTransferFrom(
+  function _stakeTAO( uint256 amountToStake_ ) internal {
+    _distributeTAOProfits();
+
+    IERC20(tao).safeTransferFrom(
         msg.sender,
         address(this),
         amountToStake_
       );
 
-    IERC20(sOHM).safeTransfer(msg.sender, amountToStake_);
+    IERC20(sTAO).safeTransfer(msg.sender, amountToStake_);
   }
 
-  function stakeOHMWithPermit (
+  function stakeTAOWithPermit (
         uint256 amountToStake_,
         uint256 deadline_,
         uint8 v_,
@@ -743,7 +739,7 @@ contract OlympusStaking is Ownable {
         bytes32 s_
     ) external {
 
-        IOHMandsOHM(ohm).permit(
+        ITAOandsTAO(tao).permit(
             msg.sender,
             address(this),
             amountToStake_,
@@ -753,39 +749,39 @@ contract OlympusStaking is Ownable {
             s_
         );
 
-        _stakeOHM( amountToStake_ );
+        _stakeTAO( amountToStake_ );
     }
 
-    function stakeOHM( uint amountToStake_ ) external returns ( bool ) {
+    function stakeTAO( uint amountToStake_ ) external returns ( bool ) {
 
-      _stakeOHM( amountToStake_ );
+      _stakeTAO( amountToStake_ );
 
       return true;
 
     }
 
-    function _unstakeOHM( uint256 amountToUnstake_ ) internal {
+    function _unstakeTAO( uint256 amountToUnstake_ ) internal {
 
-      _distributeOHMProfits();
+      _distributeTAOProfits();
 
-      IERC20(sOHM).safeTransferFrom(
+      IERC20(sTAO).safeTransferFrom(
             msg.sender,
             address(this),
             amountToUnstake_
         );
 
-      IERC20(ohm).safeTransfer(msg.sender, amountToUnstake_);
+      IERC20(tao).safeTransfer(msg.sender, amountToUnstake_);
     }
 
-    function unstakeOHMWithPermit (
+    function unstakeTAOWithPermit (
         uint256 amountToWithdraw_,
         uint256 deadline_,
         uint8 v_,
         bytes32 r_,
         bytes32 s_
     ) external {
-        
-        IOHMandsOHM(sOHM).permit(
+
+        ITAOandsTAO(sTAO).permit(
             msg.sender,
             address(this),
             amountToWithdraw_,
@@ -795,13 +791,13 @@ contract OlympusStaking is Ownable {
             s_
         );
 
-        _unstakeOHM( amountToWithdraw_ );
+        _unstakeTAO( amountToWithdraw_ );
 
     }
 
-    function unstakeOHM( uint amountToWithdraw_ ) external returns ( bool ) {
+    function unstakeTAO( uint amountToWithdraw_ ) external returns ( bool ) {
 
-        _unstakeOHM( amountToWithdraw_ );
+        _unstakeTAO( amountToWithdraw_ );
 
         return true;
     }

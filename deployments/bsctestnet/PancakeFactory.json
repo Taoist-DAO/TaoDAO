@@ -1,0 +1,59 @@
+{
+  "address": "0x6725F303b657a9451d8BA641348b6761A6CC7a17",
+  "contractName": "Factory",
+  "sourceName": "contracts/Utils/Factory.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "tokenA",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "tokenB",
+          "type": "address"
+        }
+      ],
+      "name": "createPair",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "pair",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "tokenA",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "tokenB",
+          "type": "address"
+        }
+      ],
+      "name": "getPair",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "pair",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5060bc8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c8063c9c65396146037578063e6a43905146037575b600080fd5b606260048036036040811015604b57600080fd5b506001600160a01b0381358116916020013516607e565b604080516001600160a01b039092168252519081900360200190f35b60009291505056fea264697066735822122033ff16b0fc86dd491fbe7c96c3d3c02a5bbe48c686c80b252101e3ba580d3bcf64736f6c63430007050033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c8063c9c65396146037578063e6a43905146037575b600080fd5b606260048036036040811015604b57600080fd5b506001600160a01b0381358116916020013516607e565b604080516001600160a01b039092168252519081900360200190f35b60009291505056fea264697066735822122033ff16b0fc86dd491fbe7c96c3d3c02a5bbe48c686c80b252101e3ba580d3bcf64736f6c63430007050033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

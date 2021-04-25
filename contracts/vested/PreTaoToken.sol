@@ -281,7 +281,11 @@ contract PreTaoToken is Divine {
   mapping( address => bool ) public isApprovedSeller;
 
   constructor() Divine( "PreTao", "pTAO", 18 ) {
+<<<<<<< HEAD:contracts/vested/PreTaoToken.sol
+    uint256 initialSupply_ = 304300000 * 1e18;
+=======
     uint256 initialSupply_ = 1000000000 * 1e18;
+>>>>>>> 02655c7a60d62b5ddbe391674be38d87627393e1:contracts/vested/PreOlympusToken.sol
     requireSellerApproval = true;
     allowMinting = true;
     _addApprovedSeller( address(this) );

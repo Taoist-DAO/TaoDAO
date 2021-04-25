@@ -18,6 +18,7 @@ contract TaoPresale is Ownable {
     mapping(address => bool) public whitelistedAddresses;
     mapping(address => bool) public boughtTAO;
     mapping(address => uint256) public claimable;
+    mapping(address => uint256) public claimed;
 
     uint256 public price;
     uint256 public taoTarget;
@@ -149,6 +150,7 @@ contract TaoPresale is Ownable {
 
         claimable[msg.sender] = 0;
         totalOwed = totalOwed.sub(amount);
+        claimed[msg.sender] = claimed[msg.sender].add(amount);
 
         require(TAO.transfer(msg.sender, amount), 'failed to claim');
     }

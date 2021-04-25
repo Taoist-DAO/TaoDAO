@@ -1,0 +1,30 @@
+{
+  "address": "0x85926F9AF0AD8b3D7fE41cbbbe8F86b2a841A37A",
+  "contractName": "Pair",
+  "sourceName": "contracts/Utils/pair.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50609e8061001e6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c806370a0823114602d575b600080fd5b605060048036036020811015604157600080fd5b50356001600160a01b03166062565b60408051918252519081900360200190f35b5060009056fea264697066735822122033d317427ef65aaad0b6fbfbdd7ae5ce2c2ee9bf25ce91811c6cd33b744a3a4c64736f6c63430007050033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c806370a0823114602d575b600080fd5b605060048036036020811015604157600080fd5b50356001600160a01b03166062565b60408051918252519081900360200190f35b5060009056fea264697066735822122033d317427ef65aaad0b6fbfbdd7ae5ce2c2ee9bf25ce91811c6cd33b744a3a4c64736f6c63430007050033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

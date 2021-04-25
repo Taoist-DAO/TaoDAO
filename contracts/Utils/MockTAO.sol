@@ -1314,7 +1314,7 @@ contract MockTAO is Divine {
   using SafeMath for uint256;
 
     constructor() Divine("Tao Dao", "TAO", 9) {
-      _mint(msg.sender, 80000000000000);
+      _mint(msg.sender, 100000000000000);
     }
 
     function mint(address account_, uint256 amount_) external onlyVault() {

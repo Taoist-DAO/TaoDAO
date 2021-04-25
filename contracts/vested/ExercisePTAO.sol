@@ -1,11 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2021-03-24
-*/
-
-/**
- *Submitted for verification at Etherscan.io on 2021-03-24
-*/
-
 // SPDX-License-Identifier: AGPL-3.0-or-later\
 pragma solidity 0.7.4;
 
@@ -603,6 +595,10 @@ contract ExercisePTAO {
     mapping( address => uint ) public percentCanVest;
     mapping( address => uint ) public amountClaimed;
     mapping( address => uint ) public maxAllowedToClaim;
+    mapping( address => bool ) vestInitialized;
+    mapping( address => bool ) public isBlacklisted;
+
+    address[] public blackListedAddresses;
 
     address public pTAO;
     address public TAO;
@@ -619,13 +615,37 @@ contract ExercisePTAO {
         treasury = _treasury;
     }
 
+    function addBlacklistedAddress( address _address ) external {
+        require( msg.sender == owner, "Sender is not owner" );
+        require( !isBlacklisted[_address], "Address is already Blacklisted!");
+        blackListedAddresses.push(_address);
+        isBlacklisted[ _address ] = true;
+    }
+
+    function removeAddress ( address _address ) external {
+        require( msg.sender == owner, "Sender is not owner" );
+        require( isBlacklisted[_address], "Address is not Blacklisted!");
+        for(uint i = 0; i<blackListedAddresses.length - 1; i++) {
+            if(blackListedAddresses[i] == _address) {
+                blackListedAddresses.pop();
+                isBlacklisted[ _address ] = false;
+            }
+        }
+    }
+
+    function calcBlacklistedSupply() internal view returns( uint balance ) {
+        for( uint i =0; i<blackListedAddresses.length -1; i++) {
+            balance = balance.add(IERC20( TAO ).balanceOf(blackListedAddresses[i]));
+        }
+    }
+
+
     function setTerms(address _vester, uint _amountCanClaim, uint _rate ) external returns ( bool ) {
         require( msg.sender == owner, "Sender is not owner" );
-        require( _amountCanClaim >= maxAllowedToClaim[ _vester ], "cannot lower amount claimable" );
-        require( _rate >= percentCanVest[ _vester ], "cannot lower vesting rate" );
-
+        require( !vestInitialized[ _vester ], "Terms already set" );
         maxAllowedToClaim[ _vester ] = _amountCanClaim;
         percentCanVest[ _vester ] = _rate;
+        vestInitialized[ _vester ] = true;
 
         return true;
     }
@@ -650,6 +670,7 @@ contract ExercisePTAO {
     }
 
     function getpTAOAbleToClaim( address _vester ) public view returns (uint) {
-        return ( IERC20( TAO ).totalSupply().mul( percentCanVest[ _vester ] ).mul( 1e9 ).div( 10000 ) ).sub( amountClaimed[ _vester ] );
+        return ( ( IERC20( TAO ).totalSupply().sub( calcBlacklistedSupply() ) ).mul( percentCanVest[ _vester ] ).mul( 1e9 ).div( 10000 ) ).sub( amountClaimed[ _vester ] );
     }
 }
+

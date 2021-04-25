@@ -1,9 +1,11 @@
+scripts/
 cache/
 artifacts/
 node_modules/
 limbo/
 hardhat.config/
 contracts/utils/
+deployments/bsctestnet2/
 deploy/bsctestnet/Utils/
 package-lock.json
 .env

@@ -588,6 +588,7 @@ contract TaoStakingDistributor {
     address public BUSD;
     address public DAO;
     address public stakingContract;
+   
 
     uint public nextEpochBlock;
     uint public blocksInEpoch;
@@ -613,7 +614,7 @@ contract TaoStakingDistributor {
         TAO = _TAO;
         BUSD = _BUSD;
         DAO = _DAO;
-
+      
         isInitialized = true;
 
         return true;

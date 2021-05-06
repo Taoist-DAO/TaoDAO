@@ -572,7 +572,7 @@ contract MockBUSD {
 
     string  public name = "Mock BUSD Token";
     string  public symbol = "BUSD";
-    uint256 public totalSupply = 130000000000000000000000; // 130,000 tokens
+    uint256 public totalSupply = 500000000000000000000000; // 500,000 tokens
     uint8   public decimals = 18;
 
     event Transfer(

@@ -350,7 +350,7 @@ contract PreTaoSales is Ownable {
     return pTaoPrice;
   }
 
-  function _approveBuyer( address newBuyer_ ) internal onlyOwner() returns ( bool ) {
+  function _approveBuyer( address newBuyer_ ) internal returns ( bool ) {
     approvedBuyers[newBuyer_] = true;
     return approvedBuyers[newBuyer_];
   }

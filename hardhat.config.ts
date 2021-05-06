@@ -10,7 +10,7 @@ import "@nomiclabs/hardhat-etherscan"
 import { HardhatUserConfig } from "hardhat/types"
 
 const accounts = {
-  mnemonic: process.env.MNEMONIC || "test test test test test test test test test test test junk",
+  mnemonic: process.env.testMNEMONIC || "test test test test test test test test test test test junk",
 }
 
 const config: HardhatUserConfig = {
@@ -24,15 +24,35 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 0,
+      //97: 1,
     },
     dev: {
-      // Default to 1
       default: 1,
-      // dev address mainnet
-      // 1: "",
+      97: 2,
     },
+    teamFund: {
+      default: 3,
+      // Bsc Mainnet
+      56: '0x3b5a7663A11391ABa28a04D38Fa3d82f7BA728eB',
+      // Bsc Testnet
+      97: '0xD98C22Bbd1966D47B6a6ae8F6aB3150CeeA81167'
+    },
+    DAO: {
+      default: 3,
+      // Bsc Mainnet
+      56: '0x7f0E9dc5aFdD761E865C588d9Fce35d9c6338b08',
+      // Bsc Testnet
+      97: '0xD98C22Bbd1966D47B6a6ae8F6aB3150CeeA81167'
+    }
   },
   networks: {
+  //   hardhat: {
+  //     forking: {
+  //       url: "https://bsc-dataseed.binance.org/",
+  //       blockNumber: 7089532
+  //     }
+  //   }
+  // },
     bsc: {
       url: "https://bsc-dataseed.binance.org",
       accounts,
@@ -41,7 +61,7 @@ const config: HardhatUserConfig = {
       saveDeployments: true,
     },
     bsctestnet: {
-      url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      url: "https://data-seed-prebsc-2-s1.binance.org:8545",
       accounts,
       chainId: 97,
       live: true,
@@ -49,8 +69,9 @@ const config: HardhatUserConfig = {
       tags: ["staging"],
       gasMultiplier: 2,
     },
+
     bsctestnet2: {
-      url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       accounts,
       chainId: 97,
       live: true,

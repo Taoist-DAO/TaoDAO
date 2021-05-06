@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-3.4.1/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts-3.4.1/math/SafeMath.sol";
 import "@openzeppelin/contracts-3.4.1/utils/Address.sol";
 import "@openzeppelin/contracts-3.4.1/access/Ownable.sol";
+import "./Interfaces/IVault.sol";
 
 contract TaoPresale is Ownable {
     using SafeERC20 for IERC20;
@@ -14,6 +15,7 @@ contract TaoPresale is Ownable {
 
     IERC20 public TAO; // 9 decimals
     IERC20 public BUSD; // 18 decimals
+    address public vault;
 
     mapping(address => bool) public whitelistedAddresses;
     mapping(address => bool) public boughtTAO;
@@ -30,6 +32,7 @@ contract TaoPresale is Ownable {
     bool public endUnlocked;
     bool public claimUnlocked;
     bool public isInitialized;
+    bool public isTaoSet;
 
     event StartUnlockedEvent(uint256 startTimestamp);
     event EndUnlockedEvent(uint256 endTimestamp);
@@ -42,22 +45,22 @@ contract TaoPresale is Ownable {
     }
 
     constructor(
-        IERC20 _busd,
-        IERC20 _tao
+        IERC20 _busd
     ) {
         BUSD = IERC20(_busd);
-        TAO = IERC20(_tao); //9 decimals
         totalOwed = 0;
         busdRaised = 0;
     }
 
     function initialize(
         uint256 _taoTarget,
-        uint256 _price
+        uint256 _price,
+        address _vault
     ) external onlyOwner() notInitialized() returns ( bool ) {
         taoTarget = _taoTarget;
         price = _price;
         isInitialized = true;
+        vault = _vault;
         return true;
     }
 
@@ -88,6 +91,13 @@ contract TaoPresale is Ownable {
     function setPrice(uint256 _price) external onlyOwner() {
         require(!startUnlocked, 'Presale already started!');
         price= _price;
+    }
+
+// Set Tao
+    function setTao(address _tao) external onlyOwner() {
+        require(!isTaoSet, "Tao already set");
+        TAO = IERC20(_tao); //9 decimals#
+        isTaoSet = true;
     }
 
 
@@ -128,10 +138,21 @@ contract TaoPresale is Ownable {
         EndUnlockedEvent(block.timestamp);
     }
 
+    function convertBUSDToTAO( uint _amountToConvert ) external onlyOwner() returns ( bool ) {
+        require(startUnlocked, 'presale has not yet started');
+        require(endUnlocked, 'Presale has not ended!');
+        require(isTaoSet, 'Tao Not Set!');
+
+        IERC20( BUSD ).approve( vault, _amountToConvert );
+        IVault( vault ).depositReserves( _amountToConvert );
+
+        return true;
+    }
 // Functions including unlockClaim() for when claimable.
     function unlockClaim() external onlyOwner() {
         require(endUnlocked, 'Presale has not ended!');
         require(!claimUnlocked, 'Claim already unlocked!');
+        require(isTaoSet, 'Tao Not Set!');
         claimUnlocked = true;
         ClaimUnlockedEvent(block.timestamp);
     }
@@ -158,15 +179,8 @@ contract TaoPresale is Ownable {
     function withdrawRemainingBusd() external onlyOwner() returns(bool) {
         require(startUnlocked, 'presale has not started!');
         require(endUnlocked, 'presale has not yet ended!');
+        require(claimUnlocked, 'claiming not allowed yet');
         BUSD.safeTransfer(msg.sender, BUSD.balanceOf(address(this)));
         return true;
     }
 }
-
-
-
-
-
-
-
-

@@ -1,0 +1,163 @@
+{
+  "address": "0x08b3545337EfDe91c7d3767EE3A549ba197628d7",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_TAOToken",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_previous",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_next",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_time",
+          "type": "uint256"
+        }
+      ],
+      "name": "TransferredOwnership",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "TAOToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_stakingAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "allowTransferToStaking",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xf9db441ec649da1a3b0a04becbe0b10e2d581a2768254f8292c075f064c02d0c",
+  "receipt": {
+    "to": null,
+    "from": "0xcc77159E0C7ca174672a84794Dfed8AA2E52c072",
+    "contractAddress": "0x08b3545337EfDe91c7d3767EE3A549ba197628d7",
+    "transactionIndex": 63,
+    "gasUsed": "244368",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x116469a9659645443cb35aeffde946091dd681c31f744f26335e818df7e0247e",
+    "transactionHash": "0xf9db441ec649da1a3b0a04becbe0b10e2d581a2768254f8292c075f064c02d0c",
+    "logs": [],
+    "blockNumber": 7068864,
+    "cumulativeGasUsed": "9289863",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x7065DdA3f8Ec5F6C155648BdeE4420c0525D93C6"
+  ],
+  "solcInputHash": "3499be3bb98cbb5d4b51ae1f8ae87b49",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.5+commit.eb77ed08\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_TAOToken\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_previous\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_next\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_time\",\"type\":\"uint256\"}],\"name\":\"TransferredOwnership\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"TAOToken\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_stakingAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"allowTransferToStaking\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/LP/RewardPool.sol\":\"RewardPool\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/LP/RewardPool.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\npragma solidity 0.7.5;\\r\\n\\r\\n/**\\r\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\r\\n */\\r\\ninterface IERC20 {\\r\\n    /**\\r\\n     * @dev Returns the amount of tokens in existence.\\r\\n     */\\r\\n    function totalSupply() external view returns (uint256);\\r\\n\\r\\n    /**\\r\\n     * @dev Returns the amount of tokens owned by `account`.\\r\\n     */\\r\\n    function balanceOf(address account) external view returns (uint256);\\r\\n\\r\\n    /**\\r\\n     * @dev Moves `amount` tokens from the caller's account to `recipient`.\\r\\n     *\\r\\n     * Returns a boolean value indicating whether the operation succeeded.\\r\\n     *\\r\\n     * Emits a {Transfer} event.\\r\\n     */\\r\\n    function transfer(address recipient, uint256 amount) external returns (bool);\\r\\n\\r\\n    /**\\r\\n     * @dev Returns the remaining number of tokens that `spender` will be\\r\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\r\\n     * zero by default.\\r\\n     *\\r\\n     * This value changes when {approve} or {transferFrom} are called.\\r\\n     */\\r\\n    function allowance(address owner, address spender) external view returns (uint256);\\r\\n\\r\\n    /**\\r\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\r\\n     *\\r\\n     * Returns a boolean value indicating whether the operation succeeded.\\r\\n     *\\r\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\r\\n     * that someone may use both the old and the new allowance by unfortunate\\r\\n     * transaction ordering. One possible solution to mitigate this race\\r\\n     * condition is to first reduce the spender's allowance to 0 and set the\\r\\n     * desired value afterwards:\\r\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\r\\n     *\\r\\n     * Emits an {Approval} event.\\r\\n     */\\r\\n    function approve(address spender, uint256 amount) external returns (bool);\\r\\n\\r\\n    /**\\r\\n     * @dev Moves `amount` tokens from `sender` to `recipient` using the\\r\\n     * allowance mechanism. `amount` is then deducted from the caller's\\r\\n     * allowance.\\r\\n     *\\r\\n     * Returns a boolean value indicating whether the operation succeeded.\\r\\n     *\\r\\n     * Emits a {Transfer} event.\\r\\n     */\\r\\n    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);\\r\\n\\r\\n    /**\\r\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\r\\n     * another (`to`).\\r\\n     *\\r\\n     * Note that `value` may be zero.\\r\\n     */\\r\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\r\\n\\r\\n    /**\\r\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\r\\n     * a call to {approve}. `value` is the new allowance.\\r\\n     */\\r\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\r\\n}\\r\\n\\r\\ncontract RewardPool {\\r\\n\\r\\n    event TransferredOwnership(address _previous, address _next, uint256 _time);\\r\\n\\r\\n    modifier onlyOwner() {\\r\\n        require(msg.sender == owner, \\\"Owner only\\\");\\r\\n        _;\\r\\n    }\\r\\n\\r\\n    IERC20 public TAOToken;\\r\\n\\r\\n    address public owner;\\r\\n\\r\\n    constructor( address _TAOToken ) {\\r\\n        TAOToken = IERC20( _TAOToken );\\r\\n        owner = msg.sender;\\r\\n    }\\r\\n\\r\\n    function transferOwnership(address _owner) public onlyOwner() {\\r\\n        address previousOwner = owner;\\r\\n        owner = _owner;\\r\\n        emit TransferredOwnership(previousOwner, owner, block.timestamp);\\r\\n    }\\r\\n\\r\\n    function allowTransferToStaking(address _stakingAddress, uint256 _amount) public onlyOwner() {\\r\\n        TAOToken.approve(_stakingAddress, _amount);\\r\\n    }\\r\\n\\r\\n}\\r\\n\",\"keccak256\":\"0xfcd8b63800ad5a1bd405b40d3d42394d2b8b260730b122e3816c228d9041ab4f\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516103193803806103198339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031992831617905560018054909116331790556102ac8061006d6000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80630485d4db146100515780636d20ef46146100755780638da5cb5b146100a3578063f2fde38b146100ab575b600080fd5b6100596100d1565b604080516001600160a01b039092168252519081900360200190f35b6100a16004803603604081101561008b57600080fd5b506001600160a01b0381351690602001356100e0565b005b6100596101b5565b6100a1600480360360208110156100c157600080fd5b50356001600160a01b03166101c4565b6000546001600160a01b031681565b6001546001600160a01b0316331461012c576040805162461bcd60e51b815260206004820152600a6024820152694f776e6572206f6e6c7960b01b604482015290519081900360640190fd5b600080546040805163095ea7b360e01b81526001600160a01b038681166004830152602482018690529151919092169263095ea7b392604480820193602093909283900390910190829087803b15801561018557600080fd5b505af1158015610199573d6000803e3d6000fd5b505050506040513d60208110156101af57600080fd5b50505050565b6001546001600160a01b031681565b6001546001600160a01b03163314610210576040805162461bcd60e51b815260206004820152600a6024820152694f776e6572206f6e6c7960b01b604482015290519081900360640190fd5b600180546001600160a01b038381166001600160a01b031983161792839055604080519282168084529390911660208301524282820152517f30e048e48a73aeea72c325c17c7dec1889a58fef3848c2d5fbb81502c4702f319181900360600190a1505056fea264697066735822122066c3e6f23518f105c818738bfb4f5016e044c2a2adeffda604ce097f3cc6983364736f6c63430007050033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061004c5760003560e01c80630485d4db146100515780636d20ef46146100755780638da5cb5b146100a3578063f2fde38b146100ab575b600080fd5b6100596100d1565b604080516001600160a01b039092168252519081900360200190f35b6100a16004803603604081101561008b57600080fd5b506001600160a01b0381351690602001356100e0565b005b6100596101b5565b6100a1600480360360208110156100c157600080fd5b50356001600160a01b03166101c4565b6000546001600160a01b031681565b6001546001600160a01b0316331461012c576040805162461bcd60e51b815260206004820152600a6024820152694f776e6572206f6e6c7960b01b604482015290519081900360640190fd5b600080546040805163095ea7b360e01b81526001600160a01b038681166004830152602482018690529151919092169263095ea7b392604480820193602093909283900390910190829087803b15801561018557600080fd5b505af1158015610199573d6000803e3d6000fd5b505050506040513d60208110156101af57600080fd5b50505050565b6001546001600160a01b031681565b6001546001600160a01b03163314610210576040805162461bcd60e51b815260206004820152600a6024820152694f776e6572206f6e6c7960b01b604482015290519081900360640190fd5b600180546001600160a01b038381166001600160a01b031983161792839055604080519282168084529390911660208301524282820152517f30e048e48a73aeea72c325c17c7dec1889a58fef3848c2d5fbb81502c4702f319181900360600190a1505056fea264697066735822122066c3e6f23518f105c818738bfb4f5016e044c2a2adeffda604ce097f3cc6983364736f6c63430007050033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 99,
+        "contract": "contracts/LP/RewardPool.sol:RewardPool",
+        "label": "TAOToken",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(IERC20)77"
+      },
+      {
+        "astId": 101,
+        "contract": "contracts/LP/RewardPool.sol:RewardPool",
+        "label": "owner",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IERC20)77": {
+        "encoding": "inplace",
+        "label": "contract IERC20",
+        "numberOfBytes": "20"
+      }
+    }
+  }
+}

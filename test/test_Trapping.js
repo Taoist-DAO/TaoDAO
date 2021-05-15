@@ -40,7 +40,7 @@
 //         await busd.transfer(bot.address, toWei('100000')); //100K busd
 //         await busd.transfer(investor.address, toWei('100000')); //100K busd
 //         // Transfer Tao to investors.
-//         await mockTao.transfer(investor1.address, toTao("10000")); //10K Tao
+//         // await mockTao.transfer(investor1.address, toTao("10000")); //10K Tao
 //         // await mockTao.transfer(investor2.address, toTao("10000")); //10K Tao
 
 //         //Provide liquidity
@@ -219,4 +219,3 @@
 
 //     });
 // });
-

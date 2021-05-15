@@ -311,9 +311,7 @@ contract TAOCirculatingSupplyContract {
 
     function TAOCirculatingSupply() external view returns ( uint ) {
         uint _totalSupply = IERC20( TAO ).totalSupply();
-
         uint _circulatingSupply = _totalSupply.sub( getNonCirculatingTAO() );
-
         return _circulatingSupply;
     }
 

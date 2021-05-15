@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.4;
-
+import '../Interfaces/ITAOCirculatingSupplyContract.sol';
 interface IOwnable {
 
     function owner() external view returns (address);
@@ -907,6 +907,7 @@ interface ITreasury {
     function depositPrinciple( uint depositAmount_ ) external returns ( bool );
 }
 
+
 contract TAOPrincipleDepository is IPrincipleDepository, Ownable {
 
     using FixedPoint for *;
@@ -930,6 +931,7 @@ contract TAOPrincipleDepository is IPrincipleDepository, Ownable {
     address public bondCalculator;
     address public principleToken; // TAO-DAI LP
     address public TAO;
+    address public taoCirculationContract;
 
     uint256 public totalDebt; // Total principle value of outstanding bonds
 
@@ -941,11 +943,11 @@ contract TAOPrincipleDepository is IPrincipleDepository, Ownable {
 
     bool public isInitialized;
 
-    function initialize ( address principleToken_, address TAO_ ) external onlyOwner() returns ( bool ) {
+    function initialize ( address principleToken_, address TAO_, address _taoCirculationContract ) external onlyOwner() returns ( bool ) {
         require( isInitialized == false );
         principleToken = principleToken_;
         TAO = TAO_;
-
+        taoCirculationContract = _taoCirculationContract;
         isInitialized = true;
 
         return true;
@@ -1116,7 +1118,7 @@ contract TAOPrincipleDepository is IPrincipleDepository, Ownable {
         _debtRatio = FixedPoint.fraction(
             // Must move the decimal to the right by 9 places to avoid math underflow error
             totalDebt.mul( 1e9 ),
-            IERC20( TAO ).totalSupply()
+            ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply()
         ).decode112with18().div( 1e18 );
         // Must move the decimal tot he left 18 places to account for the 9 places added above and the 19 signnificant digits added by FixedPoint.
     }

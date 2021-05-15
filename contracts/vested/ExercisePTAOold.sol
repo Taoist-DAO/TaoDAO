@@ -578,11 +578,6 @@ interface IERC20 {
      */
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
-interface IOldClaimContract {
-    function amountClaimed( address _vester ) external view returns ( uint );
-    function maxAllowedToClaim( address _vester ) external view returns ( uint );
-    function percentCanVest( address _vester ) external view returns ( uint );
-}
 
 interface IVault {
     function depositReserves( uint amount_ ) external returns ( bool );
@@ -594,7 +589,7 @@ interface IpTAO {
 
 
 
-contract ExercisePTAO {
+contract ExercisePTAOold {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
@@ -603,66 +598,28 @@ contract ExercisePTAO {
     mapping( address => uint ) public amountClaimed;
     mapping( address => uint ) public maxAllowedToClaim;
 
-    bool public isInitialized;
-    bool public hasMigrated;
-    bool public usingNewVault;
- 
-    address public PTAO;
+    address public pTAO;
     address public TAO;
     address public BUSD;
     address public owner;
 
     address public treasury;
 
-    address public previousClaimContract;
     address public taoCirculationContract;
 
-    constructor( address _owner ) {        
+    constructor( address _owner, address _pTAO, address _TAO, address _BUSD, address _treasury, address _taoCirculationContract) {
+        pTAO = _pTAO;
         owner = _owner;
-    }
-
-    function initialize( address _PTAO, address _TAO, address _BUSD, address _treasury, address _previousClaimContract, address _taoCirculationContract ) external returns ( bool ) {
-        require( msg.sender == owner, "caller is not owner" );
-        require( isInitialized == false );
-
-        PTAO = _PTAO;
         TAO = _TAO;
         BUSD = _BUSD;
         treasury = _treasury;
-        previousClaimContract = _previousClaimContract;
         taoCirculationContract = _taoCirculationContract;
-
-        isInitialized = true;
-
-        return true;
     }
-
-    // Migrates terms from old redemption contract
-    function migrate( address[] calldata _addresses ) external returns ( bool ) {
-        require( msg.sender == owner, "Sender is not owner" );
-        require( !hasMigrated, "Already migrated" );
-
-        for( uint i = 0; i < _addresses.length; i++ ) {
-            percentCanVest[ _addresses[i] ] = IOldClaimContract( previousClaimContract ).percentCanVest( _addresses[i] );
-            amountClaimed[ _addresses[i] ] = IOldClaimContract( previousClaimContract ).amountClaimed( _addresses[i] );
-            maxAllowedToClaim[ _addresses[i] ] = IOldClaimContract( previousClaimContract ).maxAllowedToClaim( _addresses[i] );
-        }
-        
-        hasMigrated = true;
-
-        return true;
-    }
-
 
     function setTerms(address _vester, uint _amountCanClaim, uint _rate ) external returns ( bool ) {
         require( msg.sender == owner, "Sender is not owner" );
         require( _amountCanClaim >= maxAllowedToClaim[ _vester ], "cannot lower amount claimable" );
         require( _rate >= percentCanVest[ _vester ], "cannot lower vesting rate" );
-
-        if( maxAllowedToClaim[ _vester ] == 0 ) {
-            amountClaimed[ _vester ] = IOldClaimContract( previousClaimContract ).amountClaimed( _vester );
-        } 
-
         maxAllowedToClaim[ _vester ] = _amountCanClaim;
         percentCanVest[ _vester ] = _rate;
 
@@ -672,36 +629,13 @@ contract ExercisePTAO {
     function exercisepTAO( uint _amountToExercise ) external returns ( bool ) {
         require( getpTAOAbleToClaim( msg.sender ).sub( _amountToExercise ) >= 0, 'Not enough TAO vested' );
         require( maxAllowedToClaim[ msg.sender ].sub( amountClaimed[ msg.sender ] ).sub( _amountToExercise ) >= 0, 'Claimed over max' );
-        
         IERC20( BUSD ).safeTransferFrom( msg.sender, address( this ), _amountToExercise );
         IERC20( BUSD ).approve( treasury, _amountToExercise );
-        
         IVault( treasury ).depositReserves( _amountToExercise );
-        
-        IpTAO( PTAO ).burnFrom( msg.sender, _amountToExercise );
-        
+        IpTAO( pTAO ).burnFrom( msg.sender, _amountToExercise );
         amountClaimed[ msg.sender ] = amountClaimed[ msg.sender ].add( _amountToExercise );
-        
         uint _amountTAOToSend = _amountToExercise.div( 1e9 );
-        
         IERC20( TAO ).safeTransfer( msg.sender, _amountTAOToSend );
-        
-        return true;
-    }
-
-    // Allows wallet owner to transfer rights to a new address
-    function changeWallets( address _oldWallet, address _newWallet ) external returns ( bool ) {
-        require( msg.sender == _oldWallet, "Only the wallet owner can change wallets" );
-        
-        maxAllowedToClaim[ _newWallet ] = maxAllowedToClaim[ _oldWallet ];
-        maxAllowedToClaim[ _oldWallet ] = 0;
-        
-        amountClaimed[ _newWallet ] = amountClaimed[ _oldWallet ];
-        amountClaimed[ _oldWallet ] = 0;
-        
-        percentCanVest[ _newWallet ] = percentCanVest[ _oldWallet ];
-        percentCanVest[ _oldWallet ] = 0;
-        
         return true;
     }
 
@@ -709,14 +643,4 @@ contract ExercisePTAO {
         require( amountClaimed[ _vester ] <=  ( ( ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply() ).mul( percentCanVest[ _vester ] ).mul( 1e9 ).div( 10000 ) ),'Claimed more then possible');
         return ( ( ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply() ).mul( percentCanVest[ _vester ] ).mul( 1e9 ).div( 10000 ) ).sub( amountClaimed[ _vester ] );
     }
-
-    function transferOwnership( address _owner ) external returns ( bool ) {
-        require( msg.sender == owner, "Sender is not owner" );
-
-        owner = _owner;
-
-        return true;
-    }
-
 }
-

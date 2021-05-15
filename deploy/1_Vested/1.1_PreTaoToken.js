@@ -1,14 +1,18 @@
 module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
     const { deploy } = deployments
+
     const { deployer, dev } = await getNamedAccounts()
 
-    await deploy('Vault', {
+    await deploy('PreTaoToken', {
         from: deployer,
         log: true,
     })
-    // const vault = await deployments.get("Vault")
+
+    //const pTao = await deployments.get("PreTaoToken")
+    // // PreTaoToken
     // await hre.run("verify:verify", {
-    //     address: vault.address,
+    //     address: pTao.address,
     // })
 }
-module.exports.tags = ["Vault", "main"]
+
+module.exports.tags = ["PreTaoToken", "Vested"]

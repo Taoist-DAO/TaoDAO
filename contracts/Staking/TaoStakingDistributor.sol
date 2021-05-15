@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.4;
-
+import '../Interfaces/ITAOCirculatingSupplyContract.sol';
 library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
@@ -588,7 +588,7 @@ contract TaoStakingDistributor {
     address public BUSD;
     address public DAO;
     address public stakingContract;
-   
+   address public taoCirculationContract;
 
     uint public nextEpochBlock;
     uint public blocksInEpoch;
@@ -602,7 +602,7 @@ contract TaoStakingDistributor {
         owner = msg.sender;
     }
 
-    function initialize( uint _nextEpochBlock, uint _blocksInEpoch, uint _rewardRate, address _vault, address _stakingContract, address _TAO, address _BUSD, address _DAO ) external returns ( bool ) {
+    function initialize( uint _nextEpochBlock, uint _blocksInEpoch, uint _rewardRate, address _vault, address _stakingContract, address _TAO, address _BUSD, address _DAO, address _taoCirculationContract ) external returns ( bool ) {
         require( msg.sender == owner );
         require( isInitialized == false );
 
@@ -614,7 +614,7 @@ contract TaoStakingDistributor {
         TAO = _TAO;
         BUSD = _BUSD;
         DAO = _DAO;
-      
+        taoCirculationContract = _taoCirculationContract;
         isInitialized = true;
 
         return true;
@@ -623,9 +623,7 @@ contract TaoStakingDistributor {
     function distribute() external returns ( bool ) {
         if ( block.number >= nextEpochBlock ) {
             nextEpochBlock = nextEpochBlock.add( blocksInEpoch );
-
-            uint _taoToDistribute = IERC20( TAO ).totalSupply().mul( rewardRate ).div( 10000 );
-
+            uint _taoToDistribute = ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply().mul( rewardRate ).div( 10000 );
             IERC20( TAO ).safeTransfer( stakingContract, _taoToDistribute );
             IStaking( stakingContract ).stakeTAO( 0 );
         }
@@ -687,6 +685,6 @@ contract TaoStakingDistributor {
     }
 
     function getCurrentRewardForNextEpoch() external view returns ( uint ) {
-        return IERC20( TAO ).totalSupply().mul( rewardRate ).div( 10000 );
+        return ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply().mul( rewardRate ).div( 10000 );
     }
 }

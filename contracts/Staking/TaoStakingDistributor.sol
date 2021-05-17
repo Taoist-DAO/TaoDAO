@@ -623,9 +623,10 @@ contract TaoStakingDistributor {
     function distribute() external returns ( bool ) {
         if ( block.number >= nextEpochBlock ) {
             nextEpochBlock = nextEpochBlock.add( blocksInEpoch );
+            IStaking( stakingContract ).stakeTAO( 0 );
             uint _taoToDistribute = ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply().mul( rewardRate ).div( 10000 );
             IERC20( TAO ).safeTransfer( stakingContract, _taoToDistribute );
-            IStaking( stakingContract ).stakeTAO( 0 );
+            
         }
         return true;
     }

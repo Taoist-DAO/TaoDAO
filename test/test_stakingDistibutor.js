@@ -12,7 +12,7 @@ describe("TaoStakingDistributor", function() {
     let uniswapFac, weth, router, UniswapFac, Weth, Router;
     let Circulation, circulation;
     let UniswapV2FactoryBytecode, UniswapV2FactoryAbi, UniswapV2RouterBytecode, UniswapV2RouterAbi, WETHAbi, WETHBytecode;
-    let TaoRewardDistributor, taoRewardDistributor, Staking, staking, Vault, vault;
+    let TaoStakingDistributor, taoStakingDistributor, Staking, staking, Vault, vault;
     let Ptao, ptao,STaoToken,sTaoToken;
     // Uniswap
         UniswapV2FactoryBytecode = UniswapV2FactoryBuild.bytecode;
@@ -43,7 +43,7 @@ describe("TaoStakingDistributor", function() {
         weth = await Weth.deploy();
         router = await Router.deploy(uniswapFac.address, weth.address);
         tao = await MockTao.deploy(c.trapAmount , uniswapFac.address, busd.address);
-        TaoRewardDistributor = await ethers.getContractFactory("TaoStakingDistributor");
+        TaoStakingDistributor = await ethers.getContractFactory("TaoStakingDistributor");
         Staking = await ethers.getContractFactory("TaoStaking");
         Vault = await ethers.getContractFactory("Vault");
 
@@ -55,19 +55,19 @@ describe("TaoStakingDistributor", function() {
 
 
 
-        taoRewardDistributor = await TaoRewardDistributor.deploy();
+        taoStakingDistributor = await TaoStakingDistributor.deploy();
 
         // Transfer money to investors.
         await busd.transfer(investor1.address, toWei('10000'));
         await busd.transfer(investor2.address, toWei('10000'));
         await busd.transfer(investor3.address, toWei('10000'));
-        await busd.transfer(taoRewardDistributor.address, toWei('100000'));
-        await tao.transfer(taoRewardDistributor.address, toTao('20000'));
+        await busd.transfer(taoStakingDistributor.address, toWei('100000'));
+        await tao.transfer(taoStakingDistributor.address, toTao('20000'));
 
         //initialize
         await circulation.initialize(tao.address);
         await staking.initialize(tao.address,sTaoToken.address,200);
-        const balance = await taoRewardDistributor.initialize(2, 200, 1, vault.address,
+        const balance = await taoStakingDistributor.initialize(2, 200, 1, vault.address,
             	staking.address ,tao.address,
              busd.address,dao.address,circulation.address);
     });
@@ -88,8 +88,12 @@ describe("TaoStakingDistributor", function() {
             // let res = await taoRewardDistributor.connect( deployer ).distribute();
         });
         it("should get corrent reward next epoch reward", async function (){
-        	let res = await taoRewardDistributor.getCurrentRewardForNextEpoch();
-        	console.log("res:",fromWei(res));
+            let circulationSupply = await circulation.TAOCirculatingSupply();
+            console.log("circulationSupply",fromTao(circulationSupply.toString()));
+
+        	let res = await taoStakingDistributor.getCurrentRewardForNextEpoch();
+        	console.log("res:",fromTao(res));
+            expect(res).to.equal(toTao("0.8"));
         })
 
     });

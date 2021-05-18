@@ -593,7 +593,7 @@ contract TaoStakingDistributor {
     uint public nextEpochBlock;
     uint public blocksInEpoch;
 
-    // reward rate is in hundreths i.e. 50 = 0.5%
+    // reward rate is in ten-thousandths i.e. 5000 = 0.5%
     uint public rewardRate;
 
     bool public isInitialized;
@@ -624,7 +624,7 @@ contract TaoStakingDistributor {
         if ( block.number >= nextEpochBlock ) {
             nextEpochBlock = nextEpochBlock.add( blocksInEpoch );
             IStaking( stakingContract ).stakeTAO( 0 );
-            uint _taoToDistribute = ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply().mul( rewardRate ).div( 10000 );
+            uint _taoToDistribute = ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply().mul( rewardRate ).div( 1000000 );
             IERC20( TAO ).safeTransfer( stakingContract, _taoToDistribute );
             
         }
@@ -646,7 +646,11 @@ contract TaoStakingDistributor {
         return true;
     }
 
-    // reward rate is in hundreths i.e. 50 = 0.5%
+    
+    /**
+        @notice set reward rate in ten-thousandths ( 5000 = 0.5% )
+        @return bool
+     */
     function setRewardRate( uint _rewardRate ) external returns ( bool ) {
         require( msg.sender == owner );
         rewardRate = _rewardRate;
@@ -686,6 +690,6 @@ contract TaoStakingDistributor {
     }
 
     function getCurrentRewardForNextEpoch() external view returns ( uint ) {
-        return ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply().mul( rewardRate ).div( 10000 );
+        return ITAOCirculatingSupplyContract(taoCirculationContract).TAOCirculatingSupply().mul( rewardRate ).div( 1000000 );
     }
 }

@@ -14,7 +14,7 @@ describe("TaoBUSDDepository", function() {
     let UniswapV2FactoryBytecode, UniswapV2FactoryAbi, UniswapV2RouterBytecode, UniswapV2RouterAbi, WETHAbi, WETHBytecode;
     let TaoStakingDistributor, taoStakingDistributor, Staking, staking, Vault, vault;
     let Ptao, ptao,STaoToken,sTaoToken;
-    let Busdbond,busdbond;
+    let Busdbond,busdbond,BondingCalculator,bondingCalculator,RewardPool,rewardPool;
     // Uniswap
         UniswapV2FactoryBytecode = UniswapV2FactoryBuild.bytecode;
         UniswapV2FactoryAbi = UniswapV2FactoryBuild.abi;
@@ -31,7 +31,12 @@ describe("TaoBUSDDepository", function() {
         Circulation = await ethers.getContractFactory("TAOCirculatingSupplyContract"); 
         Ptao = await ethers.getContractFactory("PreTaoToken");
         STaoToken = await ethers.getContractFactory("sTaoToken");
+        TaoStakingDistributor = await ethers.getContractFactory("TaoStakingDistributor");
+        Staking = await ethers.getContractFactory("TaoStaking");
+        Vault = await ethers.getContractFactory("Vault");
         Busdbond = await ethers.getContractFactory("TaoBUSDDepository");
+        BondingCalculator = await ethers.getContractFactory("TaoBondingCalculator");
+        RewardPool = await ethers.getContractFactory("RewardPool");
         UniswapFac = new ethers.ContractFactory(UniswapV2FactoryAbi, UniswapV2FactoryBytecode, deployer);
         Router = new ethers.ContractFactory(UniswapV2RouterAbi, UniswapV2RouterBytecode,  deployer);
         Weth  = new ethers.ContractFactory(WETHAbi, WETHBytecode,  deployer);
@@ -45,21 +50,19 @@ describe("TaoBUSDDepository", function() {
         weth = await Weth.deploy();
         router = await Router.deploy(uniswapFac.address, weth.address);
         tao = await MockTao.deploy(c.trapAmount , uniswapFac.address, busd.address);
-        TaoStakingDistributor = await ethers.getContractFactory("TaoStakingDistributor");
-        Staking = await ethers.getContractFactory("TaoStaking");
-        Vault = await ethers.getContractFactory("Vault");
+        bondingCalculator = await BondingCalculator.deploy();
 
 
 
         busd = await Busd.deploy();
         staking = await Staking.deploy();
         vault = await Vault.deploy();
-
+        rewardPool = await RewardPool.deploy(tao.address);
 
 
         taoStakingDistributor = await TaoStakingDistributor.deploy();
         //address BUSD_, address TAO_,address treasury_,address stakingContract_,address DAOWallet_,address circulatingTAOContract_
-        busdbond = Busdbond.deploy(busd.address, tao.address, vault.address,staking.address,dao.address, circulation.address);
+        busdbond = await Busdbond.deploy(busd.address, tao.address, vault.address,staking.address,dao.address, circulation.address);
         // Transfer money to investors.
         await busd.transfer(investor1.address, toWei('10000'));
         await busd.transfer(investor2.address, toWei('10000'));
@@ -73,6 +76,7 @@ describe("TaoBUSDDepository", function() {
         const balance = await taoStakingDistributor.initialize(2, 200, 1, vault.address,
             	staking.address ,tao.address,
              busd.address,dao.address,circulation.address);
+        await vault.initialize(tao.address,busd.address,bondingCalculator.address,rewardPool.address );
     });
 
     describe("Deployment", function () {
@@ -85,10 +89,20 @@ describe("TaoBUSDDepository", function() {
             expect(balance2).to.equal(toWei('10000'))
             expect(balance3).to.equal(toWei('10000'))
         });
-        it("Should initialize", async function () {
+        //@param bondControlVariable_ uint
+        // @param vestingPeriodInBlocks_ uint
+        // @param minPremium_ uint
+        // @param maxPayout_ uint
+        // @param DAOShare_ uint
+        // @return bool
+        it("Should set bondterm", async function () {
+             let setTremRes = await busdbond.setBondTerms(60, c.bondVestingPeriod, c.minPremium,500, 10);
         });
-        it("Should Distribute", async function () {
-
+        it("Should deposite", async function () {
+            await vault.setReserveDepositor(busdbond.address);
+            await busdbond.setBondTerms(60, c.bondVestingPeriod, c.minPremium,500, 10);
+            await busd.connect(investor1).approve(busdbond.address,toWei("500"));
+            await busdbond.connect(investor1).deposit(toWei("500"),1000,investor1.address);
         });
         it("should get corrent reward next epoch reward", async function (){
 

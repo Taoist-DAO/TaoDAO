@@ -593,7 +593,7 @@ contract TaoStakingDistributor {
     uint public nextEpochBlock;
     uint public blocksInEpoch;
 
-    // reward rate is in ten-thousandths i.e. 5000 = 0.5%
+    // reward rate is in ten-thousands i.e. 5000 = 0.5%
     uint public rewardRate;
 
     bool public isInitialized;
@@ -645,8 +645,7 @@ contract TaoStakingDistributor {
         blocksInEpoch = _blocksInEpoch;
         return true;
     }
-
-    
+   
     /**
         @notice set reward rate in ten-thousandths ( 5000 = 0.5% )
         @return bool

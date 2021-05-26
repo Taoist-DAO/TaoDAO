@@ -1077,13 +1077,10 @@ contract TaoBUSDDepository is IBondDepo, Ownable {
             maxPremium_ >= _calcPremium(),
             "Slippage protection: more than max premium"
         );
-        console.log("amount: ",amount_);
         IERC20(BUSD).safeTransferFrom(msg.sender, address(this), amount_);
 
         uint256 value_ = amount_.div(1e9);
-        console.log("value_: ",value_);
         uint256 payout_ = calculateBondInterest(value_);
-        console.log("payout_: ",value_);
         require(payout_ >= 10000000, "Bond too small"); // must be > 0.01 TAO
         require(payout_ <= getMaxPayoutAmount(), "Bond too large");
 
@@ -1192,9 +1189,6 @@ contract TaoBUSDDepository is IBondDepo, Ownable {
             ICirculatingTAO(circulatingTAOContract).TAOCirculatingSupply();
 
         uint256 maxPayout = circulatingTAO.mul(maxPayoutPercent).div(10000);
-        console.log("circulatingTAO: ",circulatingTAO);
-        console.log("maxPayout: ",maxPayout);
-        console.log("maxPayoutPercent",maxPayoutPercent);
         return maxPayout;
     }
 

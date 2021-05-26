@@ -77,6 +77,7 @@ describe("TaoBUSDDepository", function() {
             	staking.address ,tao.address,
              busd.address,dao.address,circulation.address);
         await vault.initialize(tao.address,busd.address,bondingCalculator.address,rewardPool.address );
+        await tao.setVault(vault.address);
     });
 
     describe("Deployment", function () {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.5;
-
+import "hardhat/console.sol";
 interface IOwnable {
 
   function owner() external view returns (address);
@@ -468,7 +468,9 @@ contract Vault is ITreasury, Ownable {
     require(isReserveDepositor[msg.sender] == true, "Not allowed to deposit");
     IERC20( getReserveToken ).safeTransferFrom( msg.sender, address(this), amount_ );
     address managedToken_ = getManagedToken;
+    console.log("1");
     IERC20Mintable( managedToken_ ).mint( msg.sender, amount_.div( 10 ** IERC20( managedToken_ ).decimals() ) );
+    console.log("2");
     return true;
   }
 

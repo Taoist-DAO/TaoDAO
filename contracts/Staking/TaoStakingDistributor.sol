@@ -645,7 +645,6 @@ contract TaoStakingDistributor {
         blocksInEpoch = _blocksInEpoch;
         return true;
     }
-   
     /**
         @notice set reward rate in ten-thousandths ( 5000 = 0.5% )
         @return bool

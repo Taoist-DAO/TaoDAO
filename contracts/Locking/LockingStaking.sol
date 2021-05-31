@@ -688,6 +688,10 @@ contract LockTaoStaking is Ownable {
   uint256 nextEpochBlock;
 
   bool public isInitialized;
+  bool public isLocked;
+
+  event LockedEvent(uint256 startTimestamp);
+  event UnlockedEvent(uint256 endTimestamp);
 
   modifier notInitialized() {
     require( !isInitialized );
@@ -708,6 +712,16 @@ contract LockTaoStaking is Ownable {
   function setEpochLengthintBlock( uint256 newEpochLengthInBlocks_ ) external onlyOwner() {
     epochLengthInBlocks = newEpochLengthInBlocks_;
   }
+  function lockStake() external onlyOwner() {
+        require(!isLocked, 'already locked!');
+        isLocked = true;
+        LockedEvent(block.timestamp);
+    }
+    function unlockStake() external onlyOwner() {
+        require(isLocked, 'already unlocked!');
+        isLocked = false;
+        UnlockedEvent(block.timestamp);
+    }
 
   function _distributeTAOProfits() internal {
     if( nextEpochBlock <= block.number ) {
@@ -796,7 +810,7 @@ contract LockTaoStaking is Ownable {
     }
 
     function unstakeTAO( uint amountToWithdraw_ ) external returns ( bool ) {
-
+        require(!isLocked, 'taking funds are still locked');
         _unstakeTAO( amountToWithdraw_ );
 
         return true;

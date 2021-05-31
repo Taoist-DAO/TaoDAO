@@ -688,7 +688,7 @@ contract LockTaoStaking is Ownable {
   uint256 nextEpochBlock;
 
   bool public isInitialized;
-  bool public isLocked;
+  bool public isLocked = true;
 
   event LockedEvent(uint256 startTimestamp);
   event UnlockedEvent(uint256 endTimestamp);

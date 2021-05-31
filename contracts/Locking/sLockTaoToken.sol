@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
-
+import "hardhat/console.sol";   
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -1097,7 +1097,9 @@ contract sLockTaoToken is ERC20Permit, Ownable {
         require(msg.sender == stakingContract, 'transfer not from staking contract');
 
         uint256 gonValue = value.mul(_gonsPerFragment);
+        console.log("before sub");
         _gonBalances[msg.sender] = _gonBalances[msg.sender].sub(gonValue);
+        console.log("after sub");
         _gonBalances[to] = _gonBalances[to].add(gonValue);
         emit Transfer(msg.sender, to, value);
         return true;
@@ -1108,12 +1110,15 @@ contract sLockTaoToken is ERC20Permit, Ownable {
     }
 
     function transferFrom(address from, address to, uint256 value) public override validRecipient(to) returns (bool) {
+        console.log("here");
         require(stakingContract == to, 'transfer from not to staking contract');
-
+console.log("here1");
        _allowedFragments[from][msg.sender] = _allowedFragments[from][msg.sender].sub(value);
-
+console.log("here2");
         uint256 gonValue = value.mul(_gonsPerFragment);
+        
         _gonBalances[from] = _gonBalances[from].sub(gonValue);
+        console.log("here3");
         _gonBalances[to] = _gonBalances[to].add(gonValue);
         emit Transfer(from, to, value);
 

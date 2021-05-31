@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
-
+import "hardhat/console.sol";
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -1010,6 +1010,7 @@ contract sTaoToken is ERC20Permit, Ownable {
     address public monetaryPolicy;
 
     address public stakingContract;
+    address public lockStakingContract;
 
     modifier onlyMonetaryPolicy() {
         require(msg.sender == monetaryPolicy);
@@ -1050,6 +1051,10 @@ contract sTaoToken is ERC20Permit, Ownable {
       stakingContract = newStakingContract_;
       _gonBalances[stakingContract] = TOTAL_GONS;
     }
+    function setLockStakingContract( address newLockStakingContract_ ) external onlyOwner() {
+      lockStakingContract = newLockStakingContract_;
+      // _gonBalances[lockStakingContract] = TOTAL_GONS;
+    }
 
     function setMonetaryPolicy(address monetaryPolicy_) external onlyOwner() {
         monetaryPolicy = monetaryPolicy_;
@@ -1071,7 +1076,6 @@ contract sTaoToken is ERC20Permit, Ownable {
         else {
             _rebase = taoProfit;
         }
-
         _totalSupply = _totalSupply.add(_rebase);
 
 
@@ -1094,10 +1098,12 @@ contract sTaoToken is ERC20Permit, Ownable {
     }
 
     function transfer(address to, uint256 value) public override validRecipient(to) returns (bool) {
-        require(msg.sender == stakingContract, 'transfer not from staking contract');
+        require(msg.sender == stakingContract || msg.sender == lockStakingContract , 'transfer not from staking contract or lock staking contract');
 
         uint256 gonValue = value.mul(_gonsPerFragment);
+        console.log("before sub in sTaotoken");
         _gonBalances[msg.sender] = _gonBalances[msg.sender].sub(gonValue);
+        console.log("after sub in sTaotoken");
         _gonBalances[to] = _gonBalances[to].add(gonValue);
         emit Transfer(msg.sender, to, value);
         return true;
@@ -1108,7 +1114,7 @@ contract sTaoToken is ERC20Permit, Ownable {
     }
 
     function transferFrom(address from, address to, uint256 value) public override validRecipient(to) returns (bool) {
-        require(stakingContract == to, 'transfer from not to staking contract');
+        require(stakingContract == to || lockStakingContract == to, 'transfer from not to staking contract or to lock staking contract');
 
        _allowedFragments[from][msg.sender] = _allowedFragments[from][msg.sender].sub(value);
 

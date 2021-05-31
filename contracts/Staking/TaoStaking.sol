@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
-
+import "hardhat/console.sol";
 library SafeMath {
     /**
      * @dev Returns the addition of two unsigned integers, reverting on
@@ -721,7 +721,6 @@ contract TaoStaking is Ownable {
 
   function _stakeTAO( uint256 amountToStake_ ) internal {
     _distributeTAOProfits();
-
     IERC20(tao).safeTransferFrom(
         msg.sender,
         address(this),
@@ -753,7 +752,6 @@ contract TaoStaking is Ownable {
     }
 
     function stakeTAO( uint amountToStake_ ) external returns ( bool ) {
-
       _stakeTAO( amountToStake_ );
 
       return true;

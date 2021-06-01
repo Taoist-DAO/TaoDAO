@@ -729,10 +729,7 @@ contract LockTaoStaking is Ownable {
       ITAOandsTAO(sTAO).rebase(taoToDistributeNextEpoch);
       uint256 _taoBalance = ITAOandsTAO(tao).balanceOf(address(this));
       uint256 _staoSupply = ITAOandsTAO(sTAO).circulatingSupply();
-      console.log("taoBalance: ",_taoBalance);
-      console.log("_staoSupply: ",_staoSupply);
       taoToDistributeNextEpoch = _taoBalance.sub(_staoSupply);
-      console.log("1");
       nextEpochBlock = nextEpochBlock.add( epochLengthInBlocks );
     }
   }
@@ -781,13 +778,11 @@ contract LockTaoStaking is Ownable {
     function _unstakeTAO( uint256 amountToUnstake_ ) internal {
 
       _distributeTAOProfits();
-      console.log("safe sransfer");
       IERC20(sTAO).safeTransferFrom(
             msg.sender,
             address(this),
             amountToUnstake_
         );
-      console.log("after safe sransfer");
       IERC20(tao).safeTransfer(msg.sender, amountToUnstake_);
     }
 

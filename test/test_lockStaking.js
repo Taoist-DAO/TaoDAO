@@ -108,7 +108,7 @@ describe("LockStaking", function() {
         it("Should get unloked", async function () {
             await lockStaking.unlockStake();
         });
-        it("should be able to stake TAO", async function (){
+        it("should be able to stake TAO and unstake TAO", async function (){
              //Investor1 stake 100 TAO and get sTAO
             await tao.connect( investor1 ).approve(staking.address,toTao("100"));      
             await staking.connect( investor1 ).stakeTAO(toTao("100"));
@@ -118,7 +118,13 @@ describe("LockStaking", function() {
             expect(staoBalance).to.equal(toTao("100"));
             expect(taoBalance).to.equal(toTao("0"));
 
+            await sTaoToken.connect( investor1 ).approve(staking.address,toTao("100"));      
+            await staking.connect( investor1 ).unstakeTAO(toTao("100"));
 
+            let staoBalance2 = await sTaoToken.balanceOf(investor1.address);
+            let taoBalance2 = await tao.balanceOf(investor1.address);
+            expect(staoBalance2).to.equal(toTao("0"));
+            expect(taoBalance2).to.equal(toTao("100"));
         })
         it("should be able to stake sTAO in LockStaking contract", async function (){
             //Investor1 stake 100 TAO and get sTAO
@@ -181,11 +187,13 @@ describe("LockStaking", function() {
             //owner unlock staking
             await lockStaking.unlockStake();
             //Investor1 try to unstake his sTAO tokens
+            await sLockTaoToken.connect( investor1 ).approve(lockStaking.address,toTao("100"));     
             await lockStaking.connect( investor1 ).unstakeTAO(toTao("100"));
 
-            // let lockedtokens = await sLockTaoToken.balanceOf(investor1.address);
-            // let staoTOkens = await sTaoToken.balanceOf(investor1.address);
-            // expect(lockedtokens).to.equal(toTao("0"));
+            let t1 = await sLockTaoToken.balanceOf(investor1.address);
+            let t2 = await sTaoToken.balanceOf(investor1.address);
+            expect(t1).to.equal(toTao("0"));
+            expect(t2).to.equal(toTao("100"));
            
 
         })

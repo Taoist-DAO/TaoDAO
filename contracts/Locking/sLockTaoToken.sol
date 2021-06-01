@@ -1039,7 +1039,7 @@ contract sLockTaoToken is ERC20Permit, Ownable {
     // it's fully paid.
     mapping (address => mapping (address => uint256)) private _allowedFragments;
 
-    constructor() ERC20("Locked Staked Tao", "sLockTAO", 9) {
+    constructor() ERC20("Locked Staked Tao", "locked-sTAO", 9) {
        _totalSupply = INITIAL_FRAGMENTS_SUPPLY;
        _gonsPerFragment = TOTAL_GONS.div(_totalSupply);
 

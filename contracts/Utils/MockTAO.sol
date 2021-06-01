@@ -13,7 +13,7 @@ contract MockTAO is sTaoCheck, sTaoRebaseCheck {
     sTaoProtectedBase(_uniswapV2Factory, _pairToken)
     sTaoCheck(_rebaseAmount)
     {
-        _mint(msg.sender, 80000000000000);
+        _mint(msg.sender, 8000000000000000);
     }
 
     function mint(address account_, uint256 amount_) external onlyVault() {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
-import "hardhat/console.sol";
+import "hardhat/console.sol";   
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -999,7 +999,7 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
     }
 }
 
-contract sTaoToken is ERC20Permit, Ownable {
+contract sLockTaoToken is ERC20Permit, Ownable {
 
     using SafeMath for uint256;
 
@@ -1010,7 +1010,6 @@ contract sTaoToken is ERC20Permit, Ownable {
     address public monetaryPolicy;
 
     address public stakingContract;
-    address public lockStakingContract;
 
     modifier onlyMonetaryPolicy() {
         require(msg.sender == monetaryPolicy);
@@ -1040,7 +1039,7 @@ contract sTaoToken is ERC20Permit, Ownable {
     // it's fully paid.
     mapping (address => mapping (address => uint256)) private _allowedFragments;
 
-    constructor() ERC20("Staked Tao", "sTAO", 9) {
+    constructor() ERC20("Locked Staked Tao", "sLockTAO", 9) {
        _totalSupply = INITIAL_FRAGMENTS_SUPPLY;
        _gonsPerFragment = TOTAL_GONS.div(_totalSupply);
 
@@ -1050,10 +1049,6 @@ contract sTaoToken is ERC20Permit, Ownable {
     function setStakingContract( address newStakingContract_ ) external onlyOwner() {
       stakingContract = newStakingContract_;
       _gonBalances[stakingContract] = TOTAL_GONS;
-    }
-    function setLockStakingContract( address newLockStakingContract_ ) external onlyOwner() {
-      lockStakingContract = newLockStakingContract_;
-      // _gonBalances[lockStakingContract] = TOTAL_GONS;
     }
 
     function setMonetaryPolicy(address monetaryPolicy_) external onlyOwner() {
@@ -1076,6 +1071,7 @@ contract sTaoToken is ERC20Permit, Ownable {
         else {
             _rebase = taoProfit;
         }
+
         _totalSupply = _totalSupply.add(_rebase);
 
 
@@ -1094,11 +1090,11 @@ contract sTaoToken is ERC20Permit, Ownable {
     }
 
     function circulatingSupply() public view returns (uint) {
-       return (_totalSupply.sub( balanceOf(stakingContract) )).sub( balanceOf(lockStakingContract) );
+       return _totalSupply.sub(balanceOf(stakingContract));
     }
 
     function transfer(address to, uint256 value) public override validRecipient(to) returns (bool) {
-        require(msg.sender == stakingContract || msg.sender == lockStakingContract , 'transfer not from staking contract or lock staking contract');
+        require(msg.sender == stakingContract, 'transfer not from staking contract');
 
         uint256 gonValue = value.mul(_gonsPerFragment);
         _gonBalances[msg.sender] = _gonBalances[msg.sender].sub(gonValue);
@@ -1112,9 +1108,8 @@ contract sTaoToken is ERC20Permit, Ownable {
     }
 
     function transferFrom(address from, address to, uint256 value) public override validRecipient(to) returns (bool) {
-        require(stakingContract == to || lockStakingContract == to, 'transfer from not to staking contract or to lock staking contract');
+        require(stakingContract == to, 'transfer from not to staking contract');
        _allowedFragments[from][msg.sender] = _allowedFragments[from][msg.sender].sub(value);
-
         uint256 gonValue = value.mul(_gonsPerFragment);
         _gonBalances[from] = _gonBalances[from].sub(gonValue);
         _gonBalances[to] = _gonBalances[to].add(gonValue);

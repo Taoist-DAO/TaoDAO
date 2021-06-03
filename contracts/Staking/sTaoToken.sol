@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
-import "hardhat/console.sol";
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow

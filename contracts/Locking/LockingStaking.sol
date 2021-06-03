@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
-import "hardhat/console.sol";
 
 library SafeMath {
     /**
@@ -675,7 +674,7 @@ interface ITAOandsTAO {
     ) external;
 }
 
-contract LockTaoStaking is Ownable {
+contract oLockTaStaking is Ownable {
 
   using SafeMath for uint256;
   using SafeERC20 for IERC20;

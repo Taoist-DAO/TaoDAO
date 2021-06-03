@@ -674,7 +674,7 @@ interface ITAOandsTAO {
     ) external;
 }
 
-contract oLockTaStaking is Ownable {
+contract LockTaoStaking is Ownable {
 
   using SafeMath for uint256;
   using SafeERC20 for IERC20;

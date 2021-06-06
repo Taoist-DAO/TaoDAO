@@ -1093,7 +1093,7 @@ contract sTaoToken is ERC20Permit, Ownable {
     }
 
     function circulatingSupply() public view returns (uint) {
-       return (_totalSupply.sub( balanceOf(stakingContract) )).sub( balanceOf(lockStakingContract) );
+       return _totalSupply.sub(balanceOf(stakingContract));
     }
 
     function transfer(address to, uint256 value) public override validRecipient(to) returns (bool) {

@@ -30,4 +30,4 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts, getCha
 
 }
 
-module.exports.tags = ["TaoToken", "SimpleMockTao"]
+module.exports.tags = ["TaoToken", "SimpleMockTao","Locking"]

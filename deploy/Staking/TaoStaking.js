@@ -8,6 +8,6 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
     })
 
 }
-module.exports.tags = ["TaoStaking", "Staking", "main"]
+module.exports.tags = ["TaoStaking", "Staking", "main","Locking"]
 
 

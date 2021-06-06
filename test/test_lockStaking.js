@@ -25,7 +25,9 @@ describe("LockStaking", function() {
 
     beforeEach(async function () {
     	[deployer, owner, investor1, investor2, investor3, bank, AbortController_, dao] = await ethers.getSigners();
-
+        const { deployer1, dev } = await getNamedAccounts();
+        console.log("deployer1: ",deployer1);
+        console.log("deployer: ",deployer.address);
     	Busd = await ethers.getContractFactory("MockBUSD");
         MockTao = await ethers.getContractFactory("MockTAO");
         Ptao = await ethers.getContractFactory("PreTaoToken");

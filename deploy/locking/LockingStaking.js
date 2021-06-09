@@ -8,5 +8,5 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
     })
 
 }
-module.exports.tags = [ "main","Locking"]
+module.exports.tags = [ "main","Locking","LockStaking"]
 

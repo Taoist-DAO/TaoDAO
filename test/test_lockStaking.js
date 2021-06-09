@@ -26,8 +26,7 @@ describe("LockStaking", function() {
     beforeEach(async function () {
     	[deployer, owner, investor1, investor2, investor3, bank, AbortController_, dao] = await ethers.getSigners();
         const { deployer1, dev } = await getNamedAccounts();
-        console.log("deployer1: ",deployer1);
-        console.log("deployer: ",deployer.address);
+
     	Busd = await ethers.getContractFactory("MockBUSD");
         MockTao = await ethers.getContractFactory("MockTAO");
         Ptao = await ethers.getContractFactory("PreTaoToken");
@@ -137,7 +136,7 @@ describe("LockStaking", function() {
 
             //Invoster1 try to stake 100 sTAO in locking staking
              await sTaoToken.connect( investor1 ).approve(lockStaking.address,toTao("100"));      
-             await lockStaking.connect( investor1 ).stakeTAO(toTao("100"));
+             await lockStaking.connect( investor1 ).stakeSTAO(toTao("100"));
 
              let lockedtokens = await sLockTaoToken.balanceOf(investor1.address);
             expect(lockedtokens).to.equal(toTao("100"));
@@ -155,13 +154,13 @@ describe("LockStaking", function() {
 
             //Invoster1 try to stake 100 sTAO in locking staking
              await sTaoToken.connect( investor1 ).approve(lockStaking.address,toTao("100"));      
-             await lockStaking.connect( investor1 ).stakeTAO(toTao("100"));
+             await lockStaking.connect( investor1 ).stakeSTAO(toTao("100"));
 
              let lockedtokens = await sLockTaoToken.balanceOf(investor1.address);
             expect(lockedtokens).to.equal(toTao("100"));
 
             //Investor1 try to unstake his sTAO tokens
-            await expect(lockStaking.connect( investor1 ).unstakeTAO(toTao("100")))
+            await expect(lockStaking.connect( investor1 ).unstakeSTAO(toTao("100")))
              .to.be.revertedWith("funds are locked");
 
         })
@@ -178,7 +177,7 @@ describe("LockStaking", function() {
 
             //Invoster1 try to stake 100 sTAO in locking staking
              await sTaoToken.connect( investor1 ).approve(lockStaking.address,toTao("100"));      
-             await lockStaking.connect( investor1 ).stakeTAO(toTao("100"));
+             await lockStaking.connect( investor1 ).stakeSTAO(toTao("100"));
 
              let lockedtokens = await sLockTaoToken.balanceOf(investor1.address);
             expect(lockedtokens).to.equal(toTao("100"));
@@ -187,7 +186,7 @@ describe("LockStaking", function() {
             await lockStaking.unlockStake();
             //Investor1 try to unstake his sTAO tokens
             await sLockTaoToken.connect( investor1 ).approve(lockStaking.address,toTao("100"));     
-            await lockStaking.connect( investor1 ).unstakeTAO(toTao("100"));
+            await lockStaking.connect( investor1 ).unstakeSTAO(toTao("100"));
 
             let t1 = await sLockTaoToken.balanceOf(investor1.address);
             let t2 = await sTaoToken.balanceOf(investor1.address);

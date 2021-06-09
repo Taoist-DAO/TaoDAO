@@ -259,12 +259,11 @@ interface IStaking {
 
     function initialize(
         address taoTokenAddress_,
-        address sTAO_,
+        address LockSTAO_,
         address busd_
     ) external;
 
-    //function stakeTAO(uint amountToStake_) external {
-    function stakeTAOWithPermit (
+    function stakeSTAOWithPermit (
         uint256 amountToStake_,
         uint256 deadline_,
         uint8 v_,
@@ -272,8 +271,7 @@ interface IStaking {
         bytes32 s_
     ) external;
 
-    //function unstakeTAO( uint amountToWithdraw_) external {
-    function unstakeTAOWithPermit (
+    function unstakeSTAOWithPermit (
         uint256 amountToWithdraw_,
         uint256 deadline_,
         uint8 v_,
@@ -281,9 +279,9 @@ interface IStaking {
         bytes32 s_
     ) external;
 
-    function stakeTAO( uint amountToStake_ ) external returns ( bool );
+    function stakeSTAO( uint amountToStake_ ) external returns ( bool );
 
-    function unstakeTAO( uint amountToWithdraw_ ) external returns ( bool );
+    function unstakeSTAO( uint amountToWithdraw_ ) external returns ( bool );
 
     function distributeTAOProfits() external;
 }
@@ -681,8 +679,8 @@ contract LockTaoStaking is Ownable {
 
   uint256 public epochLengthInBlocks;
 
-  address public tao;
-  address public sTAO;
+  address public sTao;
+  address public LockSTAO;
   uint256 public taoToDistributeNextEpoch;
 
   uint256 nextEpochBlock;
@@ -699,12 +697,12 @@ contract LockTaoStaking is Ownable {
   }
 
   function initialize(
-        address taoTokenAddress_,
-        address sTAO_,
+        address sTaoTokenAddress_,
+        address LockSTAO_,
         uint32 epochLengthInBlocks_
     ) external onlyOwner() notInitialized() {
-        tao = taoTokenAddress_;
-        sTAO = sTAO_;
+        sTao = sTaoTokenAddress_;
+        LockSTAO = LockSTAO_;
         epochLengthInBlocks = epochLengthInBlocks_;
         isInitialized = true;
     }
@@ -725,27 +723,27 @@ contract LockTaoStaking is Ownable {
 
   function _distributeTAOProfits() internal {
     if( nextEpochBlock <= block.number ) {
-      ITAOandsTAO(sTAO).rebase(taoToDistributeNextEpoch);
-      uint256 _taoBalance = ITAOandsTAO(tao).balanceOf(address(this));
-      uint256 _staoSupply = ITAOandsTAO(sTAO).circulatingSupply();
-      taoToDistributeNextEpoch = _taoBalance.sub(_staoSupply);
+      ITAOandsTAO(LockSTAO).rebase(taoToDistributeNextEpoch);
+      uint256 _staoBalance = ITAOandsTAO(sTao).balanceOf(address(this));
+      uint256 _lockstaoSupply = ITAOandsTAO(LockSTAO).circulatingSupply();
+      taoToDistributeNextEpoch = _staoBalance.sub(_lockstaoSupply);
       nextEpochBlock = nextEpochBlock.add( epochLengthInBlocks );
     }
   }
 
-  function _stakeTAO( uint256 amountToStake_ ) internal {
+  function _stakeSTAO( uint256 amountToStake_ ) internal {
     _distributeTAOProfits();
 
-    IERC20(tao).safeTransferFrom(
+    IERC20(sTao).safeTransferFrom(
         msg.sender,
         address(this),
         amountToStake_
       );
 
-    IERC20(sTAO).safeTransfer(msg.sender, amountToStake_);
+    IERC20(LockSTAO).safeTransfer(msg.sender, amountToStake_);
   }
 
-  function stakeTAOWithPermit (
+  function stakeSTAOWithPermit (
         uint256 amountToStake_,
         uint256 deadline_,
         uint8 v_,
@@ -753,7 +751,7 @@ contract LockTaoStaking is Ownable {
         bytes32 s_
     ) external {
 
-        ITAOandsTAO(tao).permit(
+        ITAOandsTAO(sTao).permit(
             msg.sender,
             address(this),
             amountToStake_,
@@ -763,29 +761,29 @@ contract LockTaoStaking is Ownable {
             s_
         );
 
-        _stakeTAO( amountToStake_ );
+        _stakeSTAO( amountToStake_ );
     }
 
-    function stakeTAO( uint amountToStake_ ) external returns ( bool ) {
+    function stakeSTAO( uint amountToStake_ ) external returns ( bool ) {
 
-      _stakeTAO( amountToStake_ );
+      _stakeSTAO( amountToStake_ );
 
       return true;
 
     }
 
-    function _unstakeTAO( uint256 amountToUnstake_ ) internal {
+    function _unstakeSTAO( uint256 amountToUnstake_ ) internal {
 
       _distributeTAOProfits();
-      IERC20(sTAO).safeTransferFrom(
+      IERC20(LockSTAO).safeTransferFrom(
             msg.sender,
             address(this),
             amountToUnstake_
         );
-      IERC20(tao).safeTransfer(msg.sender, amountToUnstake_);
+      IERC20(sTao).safeTransfer(msg.sender, amountToUnstake_);
     }
 
-    function unstakeTAOWithPermit (
+    function unstakeSTAOWithPermit (
         uint256 amountToWithdraw_,
         uint256 deadline_,
         uint8 v_,
@@ -793,7 +791,7 @@ contract LockTaoStaking is Ownable {
         bytes32 s_
     ) external {
 
-        ITAOandsTAO(sTAO).permit(
+        ITAOandsTAO(LockSTAO).permit(
             msg.sender,
             address(this),
             amountToWithdraw_,
@@ -803,13 +801,13 @@ contract LockTaoStaking is Ownable {
             s_
         );
 
-        _unstakeTAO( amountToWithdraw_ );
+        _unstakeSTAO( amountToWithdraw_ );
 
     }
 
-    function unstakeTAO( uint amountToWithdraw_ ) external returns ( bool ) {
+    function unstakeSTAO( uint amountToWithdraw_ ) external returns ( bool ) {
         require(!isLocked, 'funds are locked');
-        _unstakeTAO( amountToWithdraw_ );
+        _unstakeSTAO( amountToWithdraw_ );
 
         return true;
     }
